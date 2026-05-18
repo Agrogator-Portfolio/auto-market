@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  pending_confirmation
+  in_progress
+  awaiting_pickup
+  completed
+}
+
+enum DeliveryMethod {
+  courier
+  pickup
+  post
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum ServiceAppointmentStatus {
+  pending
+  scheduled
+  rejected
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  role      UserRole   @default(user)
+  fullName  String
+  phone     String
+  birthDate DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  cartItems CartItem[]
+  orders    Order[]
+  garageVehicles GarageVehicle[]
+  serviceAppointments ServiceAppointment[]
+}
+
+model GarageVehicle {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brand     String
+  model     String
+  year      Int
+  vin       String?
+  nickname  String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceAppointments ServiceAppointment[]
+
+  @@index([userId])
+}
+
+model ServiceCategory {
+  id          String                    @id
+  name        String
+  description String                    @default("")
+  autoServices AutoServiceOnCategory[]
+  appointments ServiceAppointmentOnCategory[]
+}
+
+model AutoService {
+  id          String                    @id @default(uuid())
+  name        String
+  city        String
+  address     String
+  description String
+  rating      Float                     @default(4.5)
+  workSchedule String
+  phone       String?
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  categories  AutoServiceOnCategory[]
+  appointments ServiceAppointment[]
+
+  @@index([city])
+}
+
+model AutoServiceOnCategory {
+  autoServiceId String
+  autoService   AutoService     @relation(fields: [autoServiceId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([autoServiceId, categoryId])
+}
+
+model ServiceAppointment {
+  id                 String                   @id @default(uuid())
+  number             String                   @unique
+  userId             String
+  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  garageVehicleId    String
+  garageVehicle      GarageVehicle            @relation(fields: [garageVehicleId], references: [id], onDelete: Restrict)
+  autoServiceId      String
+  autoService        AutoService              @relation(fields: [autoServiceId], references: [id], onDelete: Restrict)
+  problemDescription String
+  status             ServiceAppointmentStatus @default(pending)
+  scheduledAt        DateTime?
+  rejectReason       String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  requestedCategories ServiceAppointmentOnCategory[]
+  recommendedProducts ServiceAppointmentRecommendation[]
+
+  @@index([autoServiceId])
+}
+
+model ServiceAppointmentRecommendation {
+  appointmentId String
+  appointment   ServiceAppointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  productId     Int
+  product       Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt     DateTime           @default(now())
+
+  @@id([appointmentId, productId])
+}
+
+model ServiceAppointmentOnCategory {
+  appointmentId String
+  appointment   ServiceAppointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      ServiceCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([appointmentId, categoryId])
+}
+
+model Category {
+  id          String    @id
+  name        String
+  icon        String
+  description String
+  products    Product[]
+}
+
+model Product {
+  id           Int        @id @default(autoincrement())
+  categoryId   String
+  category     Category   @relation(fields: [categoryId], references: [id])
+  name         String
+  brand        String
+  price        Int
+  oldPrice     Int?
+  image        String     @default("")
+  inStock      Boolean    @default(true)
+  oem          String     @unique
+  sku          String     @unique
+  rating       Float      @default(4)
+  reviewsCount Int        @default(0)
+  description  String
+  attributes   Json
+  highlights   Json
+  createdAt    DateTime   @default(now())
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  serviceRecommendations ServiceAppointmentRecommendation[]
+
+  @@index([categoryId])
+  @@index([brand])
+  @@index([price])
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id             String         @id @default(uuid())
+  number         String         @unique
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         OrderStatus    @default(pending_confirmation)
+  subtotal       Int
+  deliveryCost   Int
+  total          Int
+  deliveryMethod DeliveryMethod
+  address        String
+  recipientName  String
+  phone          String
+  comment        String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  items          OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    Int
+  product      Product  @relation(fields: [productId], references: [id])
+  categorySlug String
+  name         String
+  brand        String
+  sku          String
+  price        Int
+  quantity     Int
+}

@@ -1,0 +1,15 @@
+node_modules
+.nuxt
+.output
+dist
+.git
+.gitignore
+*.md
+.env
+.env.*
+!.env.example
+coverage
+.vscode
+.idea
+*.log
+npm-debug.log*
