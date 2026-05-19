@@ -5,9 +5,11 @@ RUN npm ci --no-audit --no-fund
 
 FROM node:22-alpine AS build
 WORKDIR /app
-ARG NUXT_PUBLIC_API_BASE=/api
-ARG NUXT_API_PROXY_TARGET=http://127.0.0.1:3001
+ARG NUXT_PUBLIC_API_BASE=/backend-api
+ARG NUXT_API_BASE=http://backend:3001/api
+ARG NUXT_API_PROXY_TARGET=http://backend:3001/api
 ENV NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE
+ENV NUXT_API_BASE=$NUXT_API_BASE
 ENV NUXT_API_PROXY_TARGET=$NUXT_API_PROXY_TARGET
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

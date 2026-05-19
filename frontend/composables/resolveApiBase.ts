@@ -1,8 +1,7 @@
 /**
  * Базовый URL API.
- * - SSR: NUXT_API_BASE (внутренний адрес бэкенда, напр. http://backend:3001/api)
- * - Браузер: NUXT_PUBLIC_API_BASE (обычно /api через nginx) или полный URL домена
- * Если в сборке остался localhost, а сайт на другом домене — подставляем same-origin /api.
+ * - SSR: NUXT_API_BASE (в Docker: http://backend:3001/api)
+ * - Браузер: NUXT_PUBLIC_API_BASE (на сервере: /backend-api через Nitro proxy)
  */
 export function resolveApiBase(): string {
   const config = useRuntimeConfig()
@@ -11,24 +10,24 @@ export function resolveApiBase(): string {
     return String(config.apiBase).replace(/\/$/, '')
   }
 
-  let base = String(config.public.apiBase ?? '/api').trim()
+  const publicPath = String(config.public.apiBase ?? '/backend-api').trim()
 
-  if (base.startsWith('/')) {
-    return `${window.location.origin}${base}`.replace(/\/$/, '')
+  if (publicPath.startsWith('/')) {
+    return `${window.location.origin}${publicPath}`.replace(/\/$/, '')
   }
 
   try {
-    const parsed = new URL(base)
+    const parsed = new URL(publicPath)
     const localHost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1'
     const localSite =
       window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 
     if (localHost && !localSite) {
-      return `${window.location.origin}/api`.replace(/\/$/, '')
+      return `${window.location.origin}/backend-api`.replace(/\/$/, '')
     }
   } catch {
-    return `${window.location.origin}/api`.replace(/\/$/, '')
+    return `${window.location.origin}/backend-api`.replace(/\/$/, '')
   }
 
-  return base.replace(/\/$/, '')
+  return publicPath.replace(/\/$/, '')
 }

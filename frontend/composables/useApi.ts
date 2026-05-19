@@ -94,7 +94,7 @@ export function useApi() {
           : status === 401
             ? 'Неверный логин или пароль'
             : isNetworkError(e)
-              ? 'Нет связи с сервером. Проверьте, что API доступен и NUXT_PUBLIC_API_BASE указывает на ваш домен (например /api).'
+              ? 'Нет связи с сервером. Проверьте, что API доступен и NUXT_PUBLIC_API_BASE указывает на ваш домен (например /backend-api).'
               : e.message && !String(e.message).toLowerCase().includes('fetch')
                 ? e.message
                 : 'Ошибка сервера'
