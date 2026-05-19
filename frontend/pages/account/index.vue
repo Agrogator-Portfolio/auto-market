@@ -72,11 +72,8 @@ function setStatus(status: OrderStatus | 'all') {
           </label>
         </div>
 
-        <div v-if="!loaded" class="account-empty">
-          <p>Загрузка заказов…</p>
-        </div>
-
-        <div v-else-if="filteredOrders.length" class="account-orders">
+        <UiPageLoader :pending="!loaded">
+          <div v-if="filteredOrders.length" class="account-orders">
           <AccountOrderCard
             v-for="order in filteredOrders"
             :key="order.id"
@@ -84,12 +81,13 @@ function setStatus(status: OrderStatus | 'all') {
           />
         </div>
 
-        <div v-else class="account-empty">
-          <UiAppIcon name="lucide:package-x" :size="48" />
-          <h2>Заказов не найдено</h2>
-          <p>Попробуйте изменить фильтр или оформите новый заказ в каталоге</p>
-          <NuxtLink to="/catalog" class="btn btn--primary">В каталог</NuxtLink>
-        </div>
+          <div v-else class="account-empty">
+            <UiAppIcon name="lucide:package-x" :size="48" />
+            <h2>Заказов не найдено</h2>
+            <p>Попробуйте изменить фильтр или оформите новый заказ в каталоге</p>
+            <NuxtLink to="/catalog" class="btn btn--primary">В каталог</NuxtLink>
+          </div>
+        </UiPageLoader>
       </div>
     </div>
   </div>

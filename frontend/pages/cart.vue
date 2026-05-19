@@ -3,7 +3,7 @@ import { formatPrice } from '~/data/catalog'
 
 const FREE_DELIVERY_FROM = 10000
 
-const { lines, count, subtotal, isEmpty, setQuantity, remove, clear } = useCart()
+const { lines, count, subtotal, isEmpty, loading, setQuantity, remove, clear } = useCart()
 
 useHead({ title: 'Корзина — АвтоДеталь' })
 
@@ -89,6 +89,7 @@ onMounted(() => {
         </div>
       </Transition>
 
+      <UiPageLoader :pending="loading" min-height="14rem">
       <!-- Пустая корзина -->
       <div v-if="isEmpty" class="cart-page__empty">
         <div class="cart-page__empty-visual">
@@ -162,10 +163,11 @@ onMounted(() => {
           :free-delivery-from="FREE_DELIVERY_FROM"
         />
       </div>
+      </UiPageLoader>
     </div>
 
     <!-- Мобильная панель оформления -->
-    <div v-if="!isEmpty" class="cart-page__mobile-bar">
+    <div v-if="!loading && !isEmpty" class="cart-page__mobile-bar">
       <div class="cart-page__mobile-bar-inner container">
         <div>
           <span class="cart-page__mobile-label">{{ count }} {{ pluralItems(count) }}</span>

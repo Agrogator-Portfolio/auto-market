@@ -92,9 +92,8 @@ async function onSetDefault(v: GarageVehicle) {
           </button>
         </header>
 
-        <div v-if="loading" class="garage-page__muted">Загрузка…</div>
-
-        <div v-else-if="!vehicles.length" class="garage-page__empty">
+        <UiPageLoader :pending="loading">
+        <div v-if="!vehicles.length" class="garage-page__empty">
           <UiAppIcon name="lucide:car" :size="48" />
           <h2>Гараж пуст</h2>
           <p>Добавьте первый автомобиль, чтобы видеть подходящие запчасти в каталоге</p>
@@ -140,6 +139,7 @@ async function onSetDefault(v: GarageVehicle) {
             </div>
           </li>
         </ul>
+        </UiPageLoader>
       </div>
     </div>
 

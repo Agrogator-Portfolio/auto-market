@@ -42,7 +42,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       JWT_EXPIRES_IN: 7d
       PORT: 3001
-      CORS_ORIGIN: http://localhost:3000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
     ports:
       - "3001:3001"
     depends_on:
@@ -56,12 +56,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NUXT_PUBLIC_API_BASE: http://localhost:3001/api
+        NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-/api}
+        NUXT_API_PROXY_TARGET: http://backend:3001
     container_name: autodetail-frontend
     restart: unless-stopped
     environment:
-      NUXT_PUBLIC_API_BASE: http://localhost:3001/api
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-/api}
       NUXT_API_BASE: http://backend:3001/api
+      NUXT_API_PROXY_TARGET: http://backend:3001
     ports:
       - "3000:3000"
     depends_on:

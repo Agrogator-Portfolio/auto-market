@@ -62,7 +62,7 @@ onMounted(async () => {
   try {
     appointment.value = await getAppointment(appointmentId.value)
   } catch {
-    throw createError({ statusCode: 404, statusMessage: 'Обращение не найдено' })
+    appointment.value = null
   } finally {
     pending.value = false
   }
@@ -80,11 +80,13 @@ useHead(() => ({
     <div class="container account-page__layout">
       <AccountNav />
 
-      <div v-if="pending" class="account-page__content">
-        <p>Загрузка…</p>
-      </div>
-
-      <div v-else-if="appointment" class="account-page__content service-detail">
+      <UiPageLoader
+        :pending="pending"
+        :error="!pending && !appointment ? 'Обращение не найдено' : null"
+        min-height="14rem"
+        class="account-page__content"
+      >
+      <div v-if="appointment" class="service-detail">
         <NuxtLink to="/account/service" class="detail-back">
           <UiAppIcon name="lucide:arrow-left" :size="18" />
           К списку обращений
@@ -214,6 +216,7 @@ useHead(() => ({
           Заявка создана {{ formatServiceDateShort(appointment.createdAt) }}
         </p>
       </div>
+      </UiPageLoader>
     </div>
   </div>
 </template>

@@ -105,14 +105,14 @@ export function useCatalogList(
     () => Boolean(garageFilter?.value.enabled && garageFilter.value.vehicleId),
   )
 
-  const { data, pending, refresh } = useAsyncData(
+  const { data, pending, refresh, error } = useAsyncData(
     queryKey,
     () =>
       apiFetch<CatalogListResponse>('/catalog/products', {
         query: queryParams.value,
         auth: needsAuth.value,
       }),
-    { watch: [queryParams] },
+    { watch: [queryParams], lazy: true },
   )
 
   const paginatedList = computed(() => data.value?.items ?? [])

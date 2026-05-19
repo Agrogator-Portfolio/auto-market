@@ -1,14 +1,27 @@
+const apiProxyTarget = (process.env.NUXT_API_PROXY_TARGET || 'http://127.0.0.1:3001').replace(
+  /\/$/,
+  '',
+)
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   modules: ['@nuxt/icon'],
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
-    /** SSR / Docker: http://backend:3001/api — задаётся через NUXT_API_BASE */
-    apiBase: process.env.NUXT_API_BASE || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001/api',
+    /** SSR: прямой доступ к NestJS (Docker: http://backend:3001/api) */
+    apiBase: process.env.NUXT_API_BASE || `${apiProxyTarget}/api`,
     public: {
-      /** Браузер: http://localhost:3001/api */
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001/api',
+      /** Браузер: относительный /api (nginx) или полный URL https://ваш-домен/api */
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
+    },
+  },
+  nitro: {
+    /** Прокси /api → бэкенд (если nginx не проксирует сам) */
+    routeRules: {
+      '/api/**': {
+        proxy: `${apiProxyTarget}/api/**`,
+      },
     },
   },
   app: {

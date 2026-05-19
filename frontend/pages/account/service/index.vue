@@ -69,24 +69,22 @@ useHead({ title: 'Запись в автосервис — АвтоДеталь'
           </div>
         </div>
 
-        <div v-if="loading" class="account-empty">
-          <p>Загрузка…</p>
-        </div>
+        <UiPageLoader :pending="loading">
+          <div v-if="appointments.length" class="account-orders">
+            <ServiceAppointmentCard
+              v-for="item in appointments"
+              :key="item.id"
+              :appointment="item"
+            />
+          </div>
 
-        <div v-else-if="appointments.length" class="account-orders">
-          <ServiceAppointmentCard
-            v-for="item in appointments"
-            :key="item.id"
-            :appointment="item"
-          />
-        </div>
-
-        <div v-else class="account-empty">
-          <UiAppIcon name="lucide:wrench" :size="48" />
-          <h2>Обращений пока нет</h2>
-          <p>Запишитесь в партнёрский автосервис — выберите авто из гаража и опишите проблему</p>
-          <NuxtLink to="/account/service/book" class="btn btn--primary">Записаться в автосервис</NuxtLink>
-        </div>
+          <div v-else class="account-empty">
+            <UiAppIcon name="lucide:wrench" :size="48" />
+            <h2>Обращений пока нет</h2>
+            <p>Запишитесь в партнёрский автосервис — выберите авто из гаража и опишите проблему</p>
+            <NuxtLink to="/account/service/book" class="btn btn--primary">Записаться в автосервис</NuxtLink>
+          </div>
+        </UiPageLoader>
       </div>
     </div>
   </div>

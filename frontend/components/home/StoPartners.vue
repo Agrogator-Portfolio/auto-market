@@ -3,10 +3,10 @@ import type { AutoServiceCenter } from '~/data/service'
 
 const { apiFetch } = useApi()
 
-const { data: partners } = await useAsyncData(
+const { data: partners, pending } = await useAsyncData(
   'sto-featured',
   () => apiFetch<AutoServiceCenter[]>('/service-centers/featured', { query: { limit: 3 }, auth: false }),
-  { getCachedData: () => undefined },
+  { lazy: true },
 )
 
 function servicesLabel(center: AutoServiceCenter) {
@@ -39,20 +39,22 @@ function servicesLabel(center: AutoServiceCenter) {
         </div>
       </div>
 
-      <div v-if="partners?.length" class="sto__grid">
-        <article v-for="partner in partners" :key="partner.id" class="sto-card">
-          <div class="sto-card__head">
-            <h3 class="sto-card__name">{{ partner.name }}</h3>
-            <span class="sto-card__rating">
-              <UiAppIcon name="lucide:star" :size="16" />
-              {{ partner.rating }}
-            </span>
-          </div>
-          <p class="sto-card__city">{{ partner.city }} · {{ partner.address }}</p>
-          <p class="sto-card__services">{{ servicesLabel(partner) }}</p>
-          <NuxtLink to="/account/service/book" class="btn btn--outline btn--block">Записаться</NuxtLink>
-        </article>
-      </div>
+      <UiPageLoader :pending="pending" min-height="10rem">
+        <div v-if="partners?.length" class="sto__grid">
+          <article v-for="partner in partners" :key="partner.id" class="sto-card">
+            <div class="sto-card__head">
+              <h3 class="sto-card__name">{{ partner.name }}</h3>
+              <span class="sto-card__rating">
+                <UiAppIcon name="lucide:star" :size="16" />
+                {{ partner.rating }}
+              </span>
+            </div>
+            <p class="sto-card__city">{{ partner.city }} · {{ partner.address }}</p>
+            <p class="sto-card__services">{{ servicesLabel(partner) }}</p>
+            <NuxtLink to="/account/service/book" class="btn btn--outline btn--block">Записаться</NuxtLink>
+          </article>
+        </div>
+      </UiPageLoader>
     </div>
   </section>
 </template>

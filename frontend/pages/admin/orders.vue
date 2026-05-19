@@ -137,9 +137,8 @@ useHead({ title: 'Заказы — Админка' })
       </div>
     </header>
 
-    <div v-if="loading" class="admin-page__muted">Загрузка…</div>
-
-    <div v-else class="admin-card admin-table-wrap">
+    <UiPageLoader :pending="loading" min-height="12rem">
+    <div class="admin-card admin-table-wrap">
       <table class="admin-table">
         <thead>
           <tr>
@@ -178,6 +177,7 @@ useHead({ title: 'Заказы — Админка' })
         </tbody>
       </table>
     </div>
+    </UiPageLoader>
 
     <AdminOrderDetailModal
       :open="detailOpen"

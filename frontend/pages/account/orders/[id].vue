@@ -17,9 +17,6 @@ const justCreated = computed(() => route.query.created === '1')
 onMounted(async () => {
   order.value = await getById(orderId.value)
   pending.value = false
-  if (!order.value) {
-    throw createError({ statusCode: 404, statusMessage: 'Заказ не найден' })
-  }
 })
 
 useHead(() => ({
@@ -66,11 +63,17 @@ async function onConfirmReceived() {
 </script>
 
 <template>
-  <div v-if="order" class="account-page">
+  <div class="account-page">
     <div class="container account-page__layout">
       <AccountNav />
 
-      <div class="account-page__content">
+      <UiPageLoader
+        :pending="pending"
+        :error="!pending && !order ? 'Заказ не найден' : null"
+        min-height="14rem"
+        class="account-page__content"
+      >
+      <template v-if="order">
         <nav class="order-detail__back">
           <NuxtLink to="/account">
             <UiAppIcon name="lucide:arrow-left" :size="18" />
@@ -167,7 +170,8 @@ async function onConfirmReceived() {
             </dl>
           </section>
         </div>
-      </div>
+      </template>
+      </UiPageLoader>
     </div>
 
     <UiConfirmModal

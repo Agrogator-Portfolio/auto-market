@@ -35,6 +35,7 @@ const {
   paginatedList,
   totalPages,
   totalCount,
+  pending,
   resetFilters,
   setPage,
 } = useCatalogList(categorySlugRef, garageFilter)
@@ -105,23 +106,26 @@ watch(categorySlug, () => {
           @reset="resetFilters"
         />
 
-        <div v-if="paginatedList.length" class="catalog-page__grid">
-          <CatalogProductCard
-            v-for="product in paginatedList"
-            :key="product.id"
-            :product="product"
-          />
-        </div>
+        <UiPageLoader :pending="pending" min-height="16rem">
+          <div v-if="paginatedList.length" class="catalog-page__grid">
+            <CatalogProductCard
+              v-for="product in paginatedList"
+              :key="product.id"
+              :product="product"
+            />
+          </div>
 
-        <div v-else class="catalog-page__empty">
-          <UiAppIcon name="lucide:package-x" :size="48" />
-          <p>Ничего не найдено. Измените фильтры или поисковый запрос.</p>
-          <button type="button" class="btn btn--primary" @click="resetFilters">
-            Сбросить фильтры
-          </button>
-        </div>
+          <div v-else class="catalog-page__empty">
+            <UiAppIcon name="lucide:package-x" :size="48" />
+            <p>Ничего не найдено. Измените фильтры или поисковый запрос.</p>
+            <button type="button" class="btn btn--primary" @click="resetFilters">
+              Сбросить фильтры
+            </button>
+          </div>
+        </UiPageLoader>
 
         <CatalogPagination
+          v-if="!pending"
           :page="page"
           :total-pages="totalPages"
           @update:page="setPage"

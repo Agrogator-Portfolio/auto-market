@@ -11,24 +11,36 @@ const { apiFetch } = useApi()
 const categorySlug = computed(() => String(route.params.category) as CategorySlug)
 const productId = computed(() => Number(route.params.id))
 
-const { data: product, error } = await useAsyncData(
+const {
+  data: product,
+  error: productError,
+  pending: productPending,
+} = await useAsyncData(
   () => `product-${productId.value}`,
   () => apiFetch<CatalogProduct>(`/catalog/products/${productId.value}`, { auth: false }),
+  { lazy: true, watch: [productId] },
 )
 
-const { data: related } = await useAsyncData(
+const { data: related, pending: relatedPending } = await useAsyncData(
   () => `related-${productId.value}`,
   () =>
     apiFetch<CatalogProduct[]>(`/catalog/products/${productId.value}/related`, {
       query: { category: categorySlug.value, limit: 4 },
       auth: false,
     }),
-  { watch: [productId] },
+  { lazy: true, watch: [productId] },
 )
 
-if (error.value || !product.value || product.value.categorySlug !== categorySlug.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Товар не найден' })
-}
+const pending = computed(() => productPending.value || relatedPending.value)
+
+const loadError = computed(() => {
+  if (pending.value) return null
+  if (productError.value) return 'Не удалось загрузить товар'
+  if (!product.value || product.value.categorySlug !== categorySlug.value) {
+    return 'Товар не найден'
+  }
+  return null
+})
 
 const detailComponent = computed(() => {
   const map = {
@@ -46,10 +58,12 @@ useHead(() => ({
 </script>
 
 <template>
-  <component
-    :is="detailComponent"
-    v-if="product"
-    :product="product"
-    :related="related ?? []"
-  />
+  <UiPageLoader :pending="pending" :error="loadError" min-height="20rem">
+    <component
+      :is="detailComponent"
+      v-if="product"
+      :product="product"
+      :related="related ?? []"
+    />
+  </UiPageLoader>
 </template>

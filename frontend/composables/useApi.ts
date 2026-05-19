@@ -12,8 +12,16 @@ export class ApiError extends Error {
 
 const TOKEN_KEY = 'autodetail-token'
 
+function isNetworkError(e: { message?: string; cause?: unknown }): boolean {
+  const msg = String(e.message ?? '').toLowerCase()
+  if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('load failed')) {
+    return true
+  }
+  const cause = e.cause as { code?: string } | undefined
+  return cause?.code === 'ECONNREFUSED' || cause?.code === 'ENOTFOUND'
+}
+
 export function useApi() {
-  const config = useRuntimeConfig()
   const token = useState<string | null>('auth-token', () => null)
 
   function loadToken() {
@@ -38,8 +46,8 @@ export function useApi() {
       auth?: boolean
     } = {},
   ): Promise<T> {
-    const base = (import.meta.server ? config.apiBase : config.public.apiBase) as string
-    const url = new URL(`${base.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`)
+    const base = resolveApiBase()
+    const url = new URL(`${base}${path.startsWith('/') ? path : `/${path}`}`)
 
     if (options.query) {
       for (const [key, val] of Object.entries(options.query)) {
@@ -85,9 +93,11 @@ export function useApi() {
           ? rawMessage
           : status === 401
             ? 'Неверный логин или пароль'
-            : e.message && !String(e.message).toLowerCase().includes('fetch')
-              ? e.message
-              : 'Ошибка сервера'
+            : isNetworkError(e)
+              ? 'Нет связи с сервером. Проверьте, что API доступен и NUXT_PUBLIC_API_BASE указывает на ваш домен (например /api).'
+              : e.message && !String(e.message).toLowerCase().includes('fetch')
+                ? e.message
+                : 'Ошибка сервера'
       throw new ApiError(msg, status, body ?? e)
     }
   }
