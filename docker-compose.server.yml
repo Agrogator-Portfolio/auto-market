@@ -51,11 +51,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NUXT_PUBLIC_API_BASE: /api
+        NUXT_PUBLIC_API_BASE: /backend-api
         NUXT_API_BASE: http://backend:3001/api
         NUXT_API_PROXY_TARGET: http://backend:3001/api
     environment:
-      NUXT_PUBLIC_API_BASE: /api
+      NUXT_PUBLIC_API_BASE: /backend-api
       NUXT_API_BASE: http://backend:3001/api
     depends_on:
       backend:

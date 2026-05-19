@@ -4,14 +4,14 @@ export default defineNuxtConfig({
   modules: ['@nuxt/icon'],
   css: ['~/assets/css/main.css'],
   routeRules: {
-    '/api/**': {
+    '/backend-api/**': {
       proxy: `${process.env.NUXT_API_PROXY_TARGET || 'http://backend:3001/api'}/**`,
     },
   },
   runtimeConfig: {
     apiBase: process.env.NUXT_API_BASE || 'http://backend:3001/api',
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/backend-api',
     },
   },
   app: {
