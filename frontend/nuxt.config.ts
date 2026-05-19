@@ -3,17 +3,20 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/icon'],
   css: ['~/assets/css/main.css'],
+  routeRules: {
+    '/api/**': {
+      proxy: `${process.env.NUXT_API_PROXY_TARGET || 'http://backend:3001/api'}/**`,
+    },
+  },
   runtimeConfig: {
-    /** SSR / Docker: http://backend:3001/api — задаётся через NUXT_API_BASE */
-    apiBase: process.env.NUXT_API_BASE || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001/api',
+    apiBase: process.env.NUXT_API_BASE || 'http://backend:3001/api',
     public: {
-      /** Браузер: http://localhost:3001/api */
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001/api',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
     },
   },
   app: {
     head: {
-      title: 'АвтоДеталь — магазин автозапчастей',
+      title: 'АвтоДеталь - магазин автозапчастей',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
